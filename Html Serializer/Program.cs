@@ -12,13 +12,13 @@ static async Task<string> Load(string url)
     return html;
 }
 
-var html = await Load("https://learn.malkabruk.co.il/practicode/projects/pract-2/");
-var cleanHtml = new Regex("\\s+").Replace(html," ");
+var html = await Load("https://hebrewbooks.org/beis");
+var cleanHtml = new Regex("\\s+").Replace(html," ").Trim();
 var htmllines = new Regex("<(.*?)>").Split(cleanHtml).Where(s => s.Length > 1);
 //build the tree
-var  htmlElement =await  HtmlTree.BuildTree(htmllines);
+var  htmlElement =await HtmlTree.BuildTree(htmllines);
 
-string select= "div.language-text.highlight";//init selector
+string select= "div#mstrftr td a";//init selector
 
 var result= SerilizedRequest.Query(select, htmlElement);//search the element
 

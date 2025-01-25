@@ -12,7 +12,7 @@ namespace Html_Serializer
         public static bool Match(Selector select,HtmlElement element)
         {
             //check it
-            if (!(select.TagName == element.Name || select.TagName == null))
+            if (select.TagName != null&&(select.TagName != element.Name ))
                 return false;
             if (!(select.Id == element.Id || select.Id == null))
                 return false;
@@ -26,22 +26,36 @@ namespace Html_Serializer
         }
         public static  void MatchElement(this HtmlElement html,Selector select, HashSet<HtmlElement> matches)
         {
+            Console.WriteLine(select.TagName);
+            if( html == null)
+                return;
             if (select == null) 
-            { matches.Add(html);
-                return; 
-            }
-            if (select.Children == null&& Match(select, html))
             {
-                matches.Add(html);
+               matches.Add(html);
                 return;
             }
-            if (html == null)
-                return;
-            foreach (var item in html.Descendants())
+            var elementes= html.Descendants().Where(e=>Match(select,e));
+            foreach (var elem in elementes)
             {
-                if (Match(select, item))
-                    MatchElement(item, select.Children, matches);
+                if(select.Children==null)
+                {
+                    matches.Add(elem);
+                }
+                else
+                {
+                    MatchElement(elem, select.Children, matches);
+                }
             }
+            //foreach (var item in html.Descendants())
+            //{
+            //    if (Match(select, item))
+            //        foreach (var item1 in item.Descendants())
+            //        {
+            //            MatchElement(item1, select.Children, matches);
+
+            //        }
+
+            //}
         }
     }
 }

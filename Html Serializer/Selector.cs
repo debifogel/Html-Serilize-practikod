@@ -14,7 +14,7 @@ namespace Html_Serializer
         public List<string> Classes { get; set; }
         public Selector Parent { get; set; }
         public Selector Children { get; set; }
-        public Selector(Selector p) { Parent = p; }
+        public Selector(Selector p) { Parent = p; Children = null; }
         Selector() { }
         private static string CutName(string s)
         {
@@ -71,8 +71,11 @@ namespace Html_Serializer
                     current.Classes.Add (s);
                     helper = helper.Substring (i2);
                 }
+
                
             }
+            current = root;
+            
             current = root.Children;           
             root = null;
             current.Parent = null;

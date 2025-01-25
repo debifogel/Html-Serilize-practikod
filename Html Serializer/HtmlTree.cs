@@ -31,50 +31,64 @@ namespace Html_Serializer
             HtmlElement htmlRoot = new HtmlElement();
             HtmlElement htmlCurrent = htmlRoot;
             HtmlElement temp;
-            foreach (var line in htmllines)
+            bool isSign = false;
+            //
+            foreach (var line in htmllines)               
             {
-                string tagit = IsTagit(line);
-                if (line.StartsWith("/html"))
-                    break;
-                else if (line.StartsWith("/"))
+                
+                if (!isSign)
                 {
-                    if (htmlCurrent.childrens.Count == 0)
-                        htmlCurrent.childrens = null;
-                    htmlCurrent = htmlCurrent.Parent;
-                }
-                else if (tagit != null)
-                {
-                    temp = new HtmlElement() { Name = tagit, Parent = htmlCurrent };
-                    htmlCurrent.childrens.Add(temp);
+                    string tagit = IsTagit(line);
 
-                    //string word = line.Replace(tagit, "");
-
-                    var attributes = new Regex("([^\\s]*?)=\"(.*?)\"").Matches(line).ToList();
-                    foreach (var match in attributes)
+                    if (line.StartsWith("!--"))
                     {
-                        string name = match.Groups[1].Value; // Accessing attribute name
-                        string value = match.Groups[2].Value; // Accessing attribute value
-                        if (name == "id")
-                            temp.Id = value;
-                        else if (name == "class")
-                            temp.Classes.AddRange(value.Split(' '));
-                        else
-                            temp.Attributes.Add(name + "=" + value);
+                        isSign = true;
                     }
-                    if (HtmlHelper.Instance.Singleselectors.Contains(temp.Name)
-                        || line.EndsWith('/'))
+                    
+                    else if (line.StartsWith("/html"))
+                        return htmlRoot.childrens[0];
+
+                    else if (line[0]=='/')
                     {
-                        temp.childrens = null;
+                        htmlCurrent = htmlCurrent.Parent;
+                    }
+                    else if (tagit != null)
+                    {
+                        temp = new HtmlElement() { Name = tagit, Parent = htmlCurrent };
+                        htmlCurrent.childrens.Add(temp);
+
+                        //string word = line.Replace(tagit, "");
+
+                        var attributes = new Regex("([^\\s]*?)=\"(.*?)\"").Matches(line).ToList();
+                        foreach (var match in attributes)
+                        {
+                            string name = match.Groups[1].Value; // Accessing attribute name
+                            string value = match.Groups[2].Value; // Accessing attribute value
+                            if (name == "id")
+                                temp.Id = value;
+                            else if (name == "class")
+                                temp.Classes.AddRange(value.Split(' '));
+                            else
+                                temp.Attributes.Add(name + "=" + value);
+                        }
+                        if (!(HtmlHelper.Instance.Singleselectors.Contains(temp.Name)
+                            || line.EndsWith('/'))||
+                            temp.Name=="style")
+                        {
+                            htmlCurrent = temp;
+                        }
+                       
                     }
                     else
                     {
-                        htmlCurrent = temp;
+                        htmlCurrent.InnerHtml += line;
                     }
                 }
                 else
                 {
-                    htmlCurrent.InnerHtml = line;
-
+                    htmlCurrent.InnerHtml += line;
+                    if (line.EndsWith('>'))
+                        isSign = false;
                 }
             }
             return htmlRoot.childrens[0];

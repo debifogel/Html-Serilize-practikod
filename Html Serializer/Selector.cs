@@ -57,6 +57,7 @@ namespace Html_Serializer
                 if(helper.Contains('#'))
                 {
                     string s=CutId(helper);
+                    s = s.Substring(1);
                     current.Id = s;
                     helper=helper.Replace(s, "");
                 }
